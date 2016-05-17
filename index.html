@@ -7,10 +7,326 @@
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/tablesorter/style.css">
     <link rel="stylesheet" href="css/style.css">
 
     <script src="js/jquery-2.2.3.min.js"></script>
+    <script src="js/jquery.tablesorter.js"></script>
     <script src="js/bootstrap.min.js"></script>
+
+    <script>
+
+        var available_armors = {
+            helms: [],
+            chests: [],
+            gauntlets: [],
+            leggings: [],
+        }
+
+        function addArmor(kind, name)
+        {
+            if (available_armors[kind].indexOf(name) < 0)
+            {
+                available_armors[kind].push(name);
+                updateArmorsCounter(kind);
+            }
+        }
+
+        function removeArmor(kind, name)
+        {
+            var index = available_armors[kind].indexOf(name);
+            if (index >= 0)
+            {
+                available_armors[kind].splice(index);
+                updateArmorsCounter(kind);
+            }
+        }
+
+        function updateArmorsCounter(kind)
+        {
+            $('#nb_available_' + kind).text('(' + available_armors[kind].length + ')');
+        }
+
+
+        function setupArmorTable(parent, kind, data)
+        {
+            createArmorTable(parent, kind);
+
+            var tbody = $('#' + kind + ' tbody')[0];
+
+            for (var i = 0; i < data[kind].length; ++i)
+            {
+                var tr = document.createElement('tr');
+                tbody.appendChild(tr);
+
+                var td = document.createElement('td');
+                td.className = 'centered';
+                tr.appendChild(td);
+
+                var input = document.createElement('input');
+                input.type = 'checkbox';
+                td.appendChild(input);
+
+                input.data = {
+                    item: data[kind][i].name,
+                    row: tr,
+                };
+
+                $(input).click(function() {
+                    if (this.checked)
+                    {
+                        $(this.data.row).addClass('bg-warning');
+                        addArmor(kind, this.data.item);
+                    }
+                    else
+                    {
+                        $(this.data.row).removeClass('bg-warning');
+                        removeArmor(kind, this.data.item);
+                    }
+                });
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                if (data[kind][i].image != null)
+                {
+                    var img = document.createElement('img');
+                    img.className = 'armor-icon';
+                    img.src = 'images/' + data[kind][i].image;
+                    td.appendChild(img);
+                }
+
+                var span = document.createElement('span');
+                $(span).text(data[kind][i].name);
+                td.appendChild(span);
+
+                var columns = [
+                    'physicaldef',
+                    'strikedef',
+                    'slashdef',
+                    'thrustdef',
+                    'magicdef',
+                    'firedef',
+                    'lightningdef',
+                    'darkdef',
+                    'bleedres',
+                    'poisonres',
+                    'frostres',
+                    'curseres',
+                    'poise',
+                    'weight',
+                    'durability',
+                ];
+
+                for (var j = 0; j < columns.length; ++j)
+                {
+                    td = document.createElement('td');
+                    td.className = 'centered';
+                    $(td).text(data[kind][i][columns[j]]);
+                    tr.appendChild(td);
+                }
+            }
+
+
+            $('#' + kind).tablesorter({
+                headers: {
+                    0: {
+                        sorter: false,
+                    },
+                    1: {
+                        sorter: false
+                    },
+                    2: {
+                        sorter: false
+                    },
+                    3: {
+                        sorter: false
+                    },
+                    4: {
+                        sorter: false
+                    },
+                    5: {
+                        sorter: false,
+                    },
+                },
+                sortList: [ [1,0] ],
+            }); 
+        }
+
+
+        function createArmorTable(parent, id)
+        {
+            var table = document.createElement('table');
+            table.id = id;
+            table.className = 'table table-hover table-bordered armor-list tablesorter';
+            parent.appendChild(table);
+
+            var thead = document.createElement('thead');
+            table.appendChild(thead);
+
+            var tbody = document.createElement('tbody');
+            table.appendChild(tbody);
+
+            var tr = document.createElement('tr');
+            thead.appendChild(tr);
+
+            var th = document.createElement('th');
+            th.colSpan = 2;
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.colSpan = 4;
+            th.textContent = 'Physical defenses';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.colSpan = 4;
+            th.textContent = 'Elemental defenses';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.colSpan = 4;
+            th.textContent = 'Resistances';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.colSpan = 3;
+            tr.appendChild(th);
+
+            tr = document.createElement('tr');
+            thead.appendChild(tr);
+
+            th = document.createElement('th');
+            th.textContent = 'Owned';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            th.textContent = 'Name';
+            tr.appendChild(th);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-physicaldef.png';
+            img.title = 'Physical defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-strikedef.png';
+            img.title = 'Strike defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-slashdef.png';
+            img.title = 'Slash defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-thrustdef.png';
+            img.title = 'Thrust defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-magicdef.png';
+            img.title = 'Magic defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-firedef.png';
+            img.title = 'Fire defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-lightningdef.png';
+            img.title = 'Lightning defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-darkdef.png';
+            img.title = 'Dark defense';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-bleedres.png';
+            img.title = 'Bleed resistance';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-poisonres.png';
+            img.title = 'Poison resistance';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-frostres.png';
+            img.title = 'Frost resistance';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-curseres.png';
+            img.title = 'Curse resistance';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-poise.png';
+            img.title = 'Poise';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-weight.png';
+            img.title = 'Weight';
+            th.appendChild(img);
+
+            th = document.createElement('th');
+            tr.appendChild(th);
+
+            img = document.createElement('img');
+            img.src = 'images/icon-durability.png';
+            img.title = 'Durability';
+            th.appendChild(img);
+        }
+
+    </script>
+
 </head>
 <body>
     <div class="container-fluid">
@@ -53,6 +369,92 @@
                 </form>
             </div>
         </div>
+
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                           href="#available_helms" aria-expanded="false" aria-controls="available_helms">
+                            Available helms
+                            <span id="nb_available_helms">(0)</span>
+                            <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span>
+                        </a>
+                    </h3>
+                </div>
+                <div id="available_helms" class="panel-collapse collapse">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                           href="#available_chests" aria-expanded="false" aria-controls="available_chests">
+                            Available chests
+                            <span id="nb_available_chests">(0)</span>
+                            <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span>
+                        </a>
+                    </h3>
+                </div>
+                <div id="available_chests" class="panel-collapse collapse">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                           href="#available_gauntlets" aria-expanded="false" aria-controls="available_gauntlets">
+                            Available gauntlets
+                            <span id="nb_available_gauntlets">(0)</span>
+                            <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span>
+                        </a>
+                    </h3>
+                </div>
+                <div id="available_gauntlets" class="panel-collapse collapse">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                           href="#available_leggings" aria-expanded="false" aria-controls="available_leggings">
+                            Available leggings
+                            <span id="nb_available_leggings">(0)</span>
+                            <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span>
+                        </a>
+                    </h3>
+                </div>
+                <div id="available_leggings" class="panel-collapse collapse">
+                </div>
+            </div>
+        </div>
+
     </div>
+
+
+    <script>
+        $(document).ready(function() {
+            $.getJSON('data/armors.json', function(resp) {
+                setupArmorTable($('#available_helms')[0], 'helms', resp);
+                setupArmorTable($('#available_chests')[0], 'chests', resp);
+                setupArmorTable($('#available_gauntlets')[0], 'gauntlets', resp);
+                setupArmorTable($('#available_leggings')[0], 'leggings', resp);
+            });
+        });
+    </script>
+
 </body>
 </html>

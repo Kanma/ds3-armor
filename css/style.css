@@ -6,3 +6,40 @@
     }
 
 }
+
+
+td.centered
+{
+    text-align: center;
+}
+
+
+table.armor-list thead>tr>th
+{
+    text-align: center;
+}
+
+
+table.armor-list tbody>tr>td
+{
+    vertical-align: middle;
+}
+
+
+table.armor-list img.armor-icon
+{
+    width: 32px;
+    margin-right: 10px;
+}
+
+
+.panel-title a.collapsed span.glyphicon-menu-up
+{
+    display: none;
+}
+
+
+.panel-title a:not(.collapsed) span.glyphicon-menu-down
+{
+    display: none;
+}
