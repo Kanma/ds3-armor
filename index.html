@@ -1,13 +1,58 @@
+<!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Dark Souls III - Armor optimizer</title>
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/style.css">
 
     <script src="js/jquery-2.2.3.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Parameters</h3>
+            </div>
+            <div class="panel-body">
+                <form class="form-inline">
+                    <div class="input-group">
+                        <div class="input-group-addon"><strong>Max Equip Load</strong></div>
+                        <input type="text" class="form-control small" id="max_equip_load" value="50" />
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon"><strong>Limit Equip Load</strong></div>
+                        <input type="text" class="form-control small" id="limit_equip_load" value="69.9" />
+                        <div class="input-group-addon">%</div>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon"><strong>Weapons Load</strong></div>
+                        <input type="text" class="form-control small" id="weapons_load" value="5.0" />
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-addon"><strong>Criterion</strong></div>
+                        <select class="form-control" id="criterion">
+                          <option value="physical_def">Physical Defense</option>
+                          <option value="magic_def">Magic Defense</option>
+                          <option value="fire_def">Fire Defense</option>
+                          <option value="lightning_def">Lightning Defense</option>
+                          <option value="dark_def">Dark Defense</option>
+                          <option value="bleed_res">Bleed Resistance</option>
+                          <option value="poison_res">Poison Resistance</option>
+                          <option value="frost_res">Frost Resistance</option>
+                          <option value="curse_res">Curse Resistance</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-success">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
