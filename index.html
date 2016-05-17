@@ -16,6 +16,8 @@
 
     <script>
 
+        var ref_armors = null;
+
         var available_armors = {
             helms: [],
             chests: [],
@@ -325,6 +327,199 @@
             th.appendChild(img);
         }
 
+
+        function optimize()
+        {
+            function _create_set(helm, chest, gauntlets, legging)
+            {
+                helm = ref_armors.helms[helm];
+                chest = ref_armors.chests[chest];
+                gauntlets = ref_armors.gauntlets[gauntlets];
+                legging = ref_armors.leggings[legging];
+
+                return {
+                    helm_name:     helm.name,
+                    helm_image:    helm.image,
+                    chest_name:    chest.name,
+                    chest_image:   chest.image,
+                    gauntlets_name:   gauntlets.name,
+                    gauntlets_image:  gauntlets.image,
+                    legging_name:  legging.name,
+                    legging_image: legging.image,
+
+                    physicaldef:   helm.physicaldef + chest.physicaldef + gauntlets.physicaldef + legging.physicaldef,
+                    strikedef:     helm.strikedef + chest.strikedef + gauntlets.strikedef + legging.strikedef,
+                    slashdef:      helm.slashdef + chest.slashdef + gauntlets.slashdef + legging.slashdef,
+                    thrustdef:     helm.thrustdef + chest.thrustdef + gauntlets.thrustdef + legging.thrustdef,
+
+                    magicdef:      helm.magicdef + chest.magicdef + gauntlets.magicdef + legging.magicdef,
+                    firedef:       helm.firedef + chest.firedef + gauntlets.firedef + legging.firedef,
+                    lightningdef:  helm.lightningdef + chest.lightningdef + gauntlets.lightningdef + legging.lightningdef,
+                    darkdef:       helm.darkdef + chest.darkdef + gauntlets.darkdef + legging.darkdef,
+
+                    bleedres:      helm.bleedres + chest.bleedres + gauntlets.bleedres + legging.bleedres,
+                    poisonres:     helm.poisonres + chest.poisonres + gauntlets.poisonres + legging.poisonres,
+                    curseres:      helm.curseres + chest.curseres + gauntlets.curseres + legging.curseres,
+                    frostres:      helm.frostres + chest.frostres + gauntlets.frostres + legging.frostres,
+
+                    poise:         helm.poise + chest.poise + gauntlets.poise + legging.poise,
+                    weight:        helm.weight + chest.weight + gauntlets.weight + legging.weight,
+                };
+            }
+
+            var max_equip_load = Number($('#max_equip_load')[0].value);
+            var limit_equip_load = Number($('#limit_equip_load')[0].value);
+            var weapons_load = Number($('#weapons_load')[0].value);
+
+            var max_total_equip_load = limit_equip_load / 100.0 * max_equip_load - weapons_load;
+
+            var tbody = $('#results tbody')[0];
+            while (tbody.firstChild)
+                tbody.removeChild(tbody.firstChild);
+
+            var columns = [
+                'physicaldef',
+                'strikedef',
+                'slashdef',
+                'thrustdef',
+                'magicdef',
+                'firedef',
+                'lightningdef',
+                'darkdef',
+                'bleedres',
+                'poisonres',
+                'frostres',
+                'curseres',
+                'poise',
+                'weight',
+            ];
+
+            var results = [];
+
+            for (var helm = 0; helm < ref_armors.helms.length; ++helm)
+            {
+                if (available_armors.helms.indexOf(ref_armors.helms[helm].name) < 0)
+                    continue;
+
+                for (var chest = 0; chest < ref_armors.chests.length; ++chest)
+                {
+                    if (available_armors.chests.indexOf(ref_armors.chests[chest].name) < 0)
+                        continue;
+
+                    for (var gauntlets = 0; gauntlets < ref_armors.gauntlets.length; ++gauntlets)
+                    {
+                        if (available_armors.gauntlets.indexOf(ref_armors.gauntlets[gauntlets].name) < 0)
+                            continue;
+
+                        for (var legging = 0; legging < ref_armors.leggings.length; ++legging)
+                        {
+                            if (available_armors.leggings.indexOf(ref_armors.leggings[legging].name) < 0)
+                                continue;
+
+                            var armor_set = _create_set(helm, chest, gauntlets, legging);
+                            if (armor_set.weight > max_total_equip_load)
+                                continue;
+
+                            results.push(armor_set);
+                        }
+                    }
+                }
+            }
+
+            var criterion = $("#criterion")[0].value;
+
+            results.sort(function(a, b) {
+                if (a[criterion] < b[criterion])
+                    return 1;
+                if (a[criterion] > b[criterion])
+                    return -1;
+                return 0;
+            });
+
+            results = results.slice(0, 10);
+
+            for (var i = 0; i < results.length; ++i)
+            {
+                var tr = document.createElement('tr');
+                tbody.appendChild(tr);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                if (results[i].helm_image != null)
+                {
+                    var img = document.createElement('img');
+                    img.className = 'armor-icon';
+                    img.src = 'images/' + results[i].helm_image;
+                    td.appendChild(img);
+                }
+
+                var span = document.createElement('span');
+                $(span).text(results[i].helm_name);
+                td.appendChild(span);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                if (results[i].chest_image != null)
+                {
+                    var img = document.createElement('img');
+                    img.className = 'armor-icon';
+                    img.src = 'images/' + results[i].chest_image;
+                    td.appendChild(img);
+                }
+
+                span = document.createElement('span');
+                $(span).text(results[i].chest_name);
+                td.appendChild(span);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                if (results[i].gauntlets_image != null)
+                {
+                    var img = document.createElement('img');
+                    img.className = 'armor-icon';
+                    img.src = 'images/' + results[i].gauntlets_image;
+                    td.appendChild(img);
+                }
+
+                span = document.createElement('span');
+                $(span).text(results[i].gauntlets_name);
+                td.appendChild(span);
+
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                if (results[i].legging_image != null)
+                {
+                    var img = document.createElement('img');
+                    img.className = 'armor-icon';
+                    img.src = 'images/' + results[i].legging_image;
+                    td.appendChild(img);
+                }
+
+                span = document.createElement('span');
+                $(span).text(results[i].legging_name);
+                td.appendChild(span);
+
+                for (var j = 0; j < columns.length; ++j)
+                {
+                    td = document.createElement('td');
+                    td.className = 'centered';
+                    $(td).text(results[i][columns[j]].toFixed(1));
+                    tr.appendChild(td);
+                }
+
+                td = document.createElement('td');
+                td.className = 'centered';
+                $(td).text(((results[i].weight + weapons_load) / max_equip_load * 100).toFixed(1) + '%');
+                tr.appendChild(td);
+            }
+
+            $('#results').trigger('update');
+        }
+
     </script>
 
 </head>
@@ -353,25 +548,67 @@
                     <div class="input-group">
                         <div class="input-group-addon"><strong>Criterion</strong></div>
                         <select class="form-control" id="criterion">
-                          <option value="physical_def">Physical Defense</option>
-                          <option value="magic_def">Magic Defense</option>
-                          <option value="fire_def">Fire Defense</option>
-                          <option value="lightning_def">Lightning Defense</option>
-                          <option value="dark_def">Dark Defense</option>
-                          <option value="bleed_res">Bleed Resistance</option>
-                          <option value="poison_res">Poison Resistance</option>
-                          <option value="frost_res">Frost Resistance</option>
-                          <option value="curse_res">Curse Resistance</option>
+                          <option value="physicaldef">Physical Defense</option>
+                          <option value="magicdef">Magic Defense</option>
+                          <option value="firedef">Fire Defense</option>
+                          <option value="lightningdef">Lightning Defense</option>
+                          <option value="darkdef">Dark Defense</option>
+                          <option value="bleedres">Bleed Resistance</option>
+                          <option value="poisonres">Poison Resistance</option>
+                          <option value="frostres">Frost Resistance</option>
+                          <option value="curseres">Curse Resistance</option>
                         </select>
                     </div>
 
-                    <button type="button" class="btn btn-success">Search</button>
+                    <button type="button" class="btn btn-success" id="btn_search">Search</button>
                 </form>
             </div>
         </div>
 
+        <div id="results_panel" class="panel panel-success" style="display:none;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Results</h3>
+            </div>
+            <div class="panel-body">
+                <table id="results" class="table table-hover table-bordered armor-list tablesorter">
+                    <thead>
+                        <tr>
+                            <th colspan="4"></th>
+                            <th colspan="4">Physical defenses</th>
+                            <th colspan="4">Elemental defenses</th>
+                            <th colspan="4">Resistances</th>
+                            <th colspan="3"></th>
+                        </tr>
+                        <tr>
+                            <th>Helm</th>
+                            <th>Chest</th>
+                            <th>Gloves</th>
+                            <th>Legging</th>
+                            <th><img src="images/icon-physicaldef.png" title="Physical defense" /></th>
+                            <th><img src="images/icon-strikedef.png" title="Strike defense" /></th>
+                            <th><img src="images/icon-slashdef.png" title="Slash defense" /></th>
+                            <th><img src="images/icon-thrustdef.png" title="Thrust defense" /></th>
+                            <th><img src="images/icon-magicdef.png" title="Magic defense" /></th>
+                            <th><img src="images/icon-firedef.png" title="Fire defense" /></th>
+                            <th><img src="images/icon-lightningdef.png" title="Lightning defense" /></th>
+                            <th><img src="images/icon-darkdef.png" title="Dark defense" /></th>
+                            <th><img src="images/icon-bleedres.png" title="Bleed resistance" /></th>
+                            <th><img src="images/icon-poisonres.png" title="Poison resistance" /></th>
+                            <th><img src="images/icon-frostres.png" title="Frost resistance" /></th>
+                            <th><img src="images/icon-curseres.png" title="Curse resistance" /></th>
+                            <th><img src="images/icon-poise.png" title="Poise" /></th>
+                            <th><img src="images/icon-durability.png" title="Durability" /></th>
+                            <th><img src="images/icon-weight.png" title="Equip load" /></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="panel-group" id="accordion">
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
@@ -389,7 +626,7 @@
         </div>
 
         <div class="panel-group" id="accordion">
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
@@ -407,7 +644,7 @@
         </div>
 
         <div class="panel-group" id="accordion">
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
@@ -425,7 +662,7 @@
         </div>
 
         <div class="panel-group" id="accordion">
-            <div class="panel panel-primary">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion"
@@ -448,10 +685,51 @@
     <script>
         $(document).ready(function() {
             $.getJSON('data/armors.json', function(resp) {
+                ref_armors = resp;
+
                 setupArmorTable($('#available_helms')[0], 'helms', resp);
                 setupArmorTable($('#available_chests')[0], 'chests', resp);
                 setupArmorTable($('#available_gauntlets')[0], 'gauntlets', resp);
                 setupArmorTable($('#available_leggings')[0], 'leggings', resp);
+
+                $('#btn_search').click(function() {
+                    $('#results_panel').show();
+                    optimize();
+                });
+
+                $('#results').tablesorter({
+                    headers: {
+                        0: {
+                            sorter: false,
+                        },
+                        1: {
+                            sorter: false
+                        },
+                        2: {
+                            sorter: false
+                        },
+                        3: {
+                            sorter: false
+                        },
+                        4: {
+                            sorter: false
+                        },
+                        5: {
+                            sorter: false,
+                        },
+                        6: {
+                            sorter: false,
+                        },
+                        7: {
+                            sorter: false,
+                        },
+                        8: {
+                            sorter: false,
+                        },
+                    },
+                }); 
+
+                optimize();
             });
         });
     </script>
