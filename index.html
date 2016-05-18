@@ -109,13 +109,10 @@
                 td = document.createElement('td');
                 tr.appendChild(td);
 
-                if (data[kind][i].image != null)
-                {
-                    var img = document.createElement('img');
-                    img.className = 'armor-icon';
-                    img.src = 'images/' + data[kind][i].image;
-                    td.appendChild(img);
-                }
+                var img = document.createElement('img');
+                img.className = 'armor-icon';
+                img.src = 'images/' + (data[kind][i].image != null ? data[kind][i].image : 'placeholder-icon.png') ;
+                td.appendChild(img);
 
                 var span = document.createElement('span');
                 $(span).text(data[kind][i].name);
@@ -467,13 +464,10 @@
                 td = document.createElement('td');
                 tr.appendChild(td);
 
-                if (results[i].helm_image != null)
-                {
-                    var img = document.createElement('img');
-                    img.className = 'armor-icon';
-                    img.src = 'images/' + results[i].helm_image;
-                    td.appendChild(img);
-                }
+                var img = document.createElement('img');
+                img.className = 'armor-icon';
+                img.src = 'images/' + (results[i].helm_image != null ? results[i].helm_image : 'placeholder-icon.png') ;
+                td.appendChild(img);
 
                 var span = document.createElement('span');
                 $(span).text(results[i].helm_name);
@@ -482,13 +476,10 @@
                 td = document.createElement('td');
                 tr.appendChild(td);
 
-                if (results[i].chest_image != null)
-                {
-                    var img = document.createElement('img');
-                    img.className = 'armor-icon';
-                    img.src = 'images/' + results[i].chest_image;
-                    td.appendChild(img);
-                }
+                var img = document.createElement('img');
+                img.className = 'armor-icon';
+                img.src = 'images/' + (results[i].chest_image != null ? results[i].chest_image : 'placeholder-icon.png') ;
+                td.appendChild(img);
 
                 span = document.createElement('span');
                 $(span).text(results[i].chest_name);
@@ -497,13 +488,10 @@
                 td = document.createElement('td');
                 tr.appendChild(td);
 
-                if (results[i].gauntlets_image != null)
-                {
-                    var img = document.createElement('img');
-                    img.className = 'armor-icon';
-                    img.src = 'images/' + results[i].gauntlets_image;
-                    td.appendChild(img);
-                }
+                var img = document.createElement('img');
+                img.className = 'armor-icon';
+                img.src = 'images/' + (results[i].gauntlets_image != null ? results[i].gauntlets_image : 'placeholder-icon.png') ;
+                td.appendChild(img);
 
                 span = document.createElement('span');
                 $(span).text(results[i].gauntlets_name);
@@ -512,13 +500,10 @@
                 td = document.createElement('td');
                 tr.appendChild(td);
 
-                if (results[i].legging_image != null)
-                {
-                    var img = document.createElement('img');
-                    img.className = 'armor-icon';
-                    img.src = 'images/' + results[i].legging_image;
-                    td.appendChild(img);
-                }
+                var img = document.createElement('img');
+                img.className = 'armor-icon';
+                img.src = 'images/' + (results[i].legging_image != null ? results[i].legging_image : 'placeholder-icon.png') ;
+                td.appendChild(img);
 
                 span = document.createElement('span');
                 $(span).text(results[i].legging_name);
@@ -717,8 +702,6 @@
             $('#limit_equip_load')[0].value = user_data.limit_equip_load;
             $('#weapons_load')[0].value = user_data.weapons_load;
             $('#criterion').val(user_data.criterion);
-
-            console.log(user_data);
 
             // Load the list of armor items
             $.getJSON('data/armors.json', function(resp) {
