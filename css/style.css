@@ -8,6 +8,23 @@
 }
 
 
+.title-panel
+{
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+
+@media (max-width: 768px) {
+
+    .title-panel img
+    {
+        width: 360px;
+    }
+
+}
+
+
 td.centered
 {
     text-align: center;
