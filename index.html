@@ -13,40 +13,56 @@
     <script src="js/jquery-2.2.3.min.js"></script>
     <script src="js/jquery.tablesorter.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/js-cookie.js"></script>
 
     <script>
 
         var ref_armors = null;
 
-        var available_armors = {
-            helms: [],
-            chests: [],
-            gauntlets: [],
-            leggings: [],
+        var user_data = {
+            max_equip_load: 50.0,
+            limit_equip_load: 69.9,
+            weapons_load: 5.0,
+            criterion: 'physicaldef',
+
+            available_armors: {
+                helms: [],
+                chests: [],
+                gauntlets: [],
+                leggings: [],
+            }
+        }
+
+
+        function saveUserData()
+        {
+            Cookies.set('user_data', user_data, { expires: 365 });
         }
 
         function addArmor(kind, name)
         {
-            if (available_armors[kind].indexOf(name) < 0)
+            if (user_data.available_armors[kind].indexOf(name) < 0)
             {
-                available_armors[kind].push(name);
+                user_data.available_armors[kind].push(name);
                 updateArmorsCounter(kind);
+                saveUserData();
             }
         }
 
         function removeArmor(kind, name)
         {
-            var index = available_armors[kind].indexOf(name);
+            var index = user_data.available_armors[kind].indexOf(name);
             if (index >= 0)
             {
-                available_armors[kind].splice(index);
+                user_data.available_armors[kind].splice(index);
                 updateArmorsCounter(kind);
+                saveUserData();
             }
         }
 
         function updateArmorsCounter(kind)
         {
-            $('#nb_available_' + kind).text('(' + available_armors[kind].length + ')');
+            $('#nb_available_' + kind).text('(' + user_data.available_armors[kind].length + ')');
         }
 
 
@@ -68,6 +84,9 @@
                 var input = document.createElement('input');
                 input.type = 'checkbox';
                 td.appendChild(input);
+
+                if (user_data.available_armors[kind].indexOf(data[kind][i].name) >= 0)
+                    input.checked = true;
 
                 input.data = {
                     item: data[kind][i].name,
@@ -153,6 +172,8 @@
                 },
                 sortList: [ [1,0] ],
             }); 
+
+            updateArmorsCounter(kind);
         }
 
 
@@ -398,22 +419,22 @@
 
             for (var helm = 0; helm < ref_armors.helms.length; ++helm)
             {
-                if (available_armors.helms.indexOf(ref_armors.helms[helm].name) < 0)
+                if (user_data.available_armors.helms.indexOf(ref_armors.helms[helm].name) < 0)
                     continue;
 
                 for (var chest = 0; chest < ref_armors.chests.length; ++chest)
                 {
-                    if (available_armors.chests.indexOf(ref_armors.chests[chest].name) < 0)
+                    if (user_data.available_armors.chests.indexOf(ref_armors.chests[chest].name) < 0)
                         continue;
 
                     for (var gauntlets = 0; gauntlets < ref_armors.gauntlets.length; ++gauntlets)
                     {
-                        if (available_armors.gauntlets.indexOf(ref_armors.gauntlets[gauntlets].name) < 0)
+                        if (user_data.available_armors.gauntlets.indexOf(ref_armors.gauntlets[gauntlets].name) < 0)
                             continue;
 
                         for (var legging = 0; legging < ref_armors.leggings.length; ++legging)
                         {
-                            if (available_armors.leggings.indexOf(ref_armors.leggings[legging].name) < 0)
+                            if (user_data.available_armors.leggings.indexOf(ref_armors.leggings[legging].name) < 0)
                                 continue;
 
                             var armor_set = _create_set(helm, chest, gauntlets, legging);
@@ -684,6 +705,22 @@
 
     <script>
         $(document).ready(function() {
+
+            // Load user data from the cookie
+            var data = Cookies.getJSON('user_data');
+            if (data === undefined)
+                saveUserData();
+            else
+                user_data = data;
+
+            $('#max_equip_load')[0].value = user_data.max_equip_load;
+            $('#limit_equip_load')[0].value = user_data.limit_equip_load;
+            $('#weapons_load')[0].value = user_data.weapons_load;
+            $('#criterion').val(user_data.criterion);
+
+            console.log(user_data);
+
+            // Load the list of armor items
             $.getJSON('data/armors.json', function(resp) {
                 ref_armors = resp;
 
@@ -694,6 +731,13 @@
 
                 $('#btn_search').click(function() {
                     $('#results_panel').show();
+
+                    user_data.max_equip_load = Number($('#max_equip_load')[0].value);
+                    user_data.limit_equip_load = Number($('#limit_equip_load')[0].value);
+                    user_data.weapons_load = Number($('#weapons_load')[0].value);
+                    user_data.criterion = $('#criterion')[0].value;
+
+                    saveUserData();
                     optimize();
                 });
 
