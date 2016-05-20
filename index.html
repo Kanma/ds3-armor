@@ -86,7 +86,10 @@
                 td.appendChild(input);
 
                 if (user_data.available_armors[kind].indexOf(data[kind][i].name) >= 0)
+                {
                     input.checked = true;
+                    $(tr).addClass('bg-warning');
+                }
 
                 input.data = {
                     item: data[kind][i].name,
