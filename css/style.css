@@ -5,12 +5,18 @@
         width: 4em;
     }
 
+    .form-inline .input-group-addon.hidden-wide
+    {
+        display: none;
+    }
+
 }
 
 
 .title-panel
 {
     text-align: center;
+    margin-top: 25px;
     margin-bottom: 25px;
 }
 
