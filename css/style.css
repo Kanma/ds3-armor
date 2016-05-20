@@ -5,6 +5,11 @@
         width: 4em;
     }
 
+    .form-inline .input-group-addon.hidden-wide
+    {
+        display: none;
+    }
+
 }
 
 

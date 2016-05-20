@@ -23,7 +23,7 @@
             max_equip_load: 50.0,
             limit_equip_load: 69.9,
             weapons_load: 5.0,
-            criterion: 'physicaldef',
+            criterions: ['physicaldef'],
 
             available_armors: {
                 helms: [],
@@ -341,12 +341,58 @@
                 }
             }
 
-            var criterion = $("#criterion")[0].value;
+            var criterion1 = $("#criterion1")[0].value;
+            var criterion2 = $("#criterion2")[0].value;
+            var criterion3 = $("#criterion3")[0].value;
+
+            var total_weight = 1.0;
+
+            var criterions = [
+                {
+                    name: criterion1,
+                    weight: total_weight,
+                }
+            ];
+
+            if (criterion2 === "-")
+            {
+                criterion2 = criterion3;
+                criterion3 = "-";
+            }
+
+            if (criterion2 !== "-")
+            {
+                criterions.push({
+                    name: criterion2,
+                    weight: 0.5,
+                });
+
+                total_weight += 0.5;
+            }
+
+            if (criterion3 !== "-")
+            {
+                criterions.push({
+                    name: criterion3,
+                    weight: 0.25,
+                });
+
+                total_weight += 0.25;
+            }
 
             results.sort(function(a, b) {
-                if (a[criterion] < b[criterion])
+                var score_a = a[criterions[0].name] * criterions[0].weight;
+                var score_b = b[criterions[0].name] * criterions[0].weight;
+
+                for (var i = 1; i < criterions.length; ++i)
+                {
+                    score_a += a[criterions[i].name] * criterions[i].weight;
+                    score_b += b[criterions[i].name] * criterions[i].weight;
+                }
+
+                if (score_a < score_b)
                     return 1;
-                if (a[criterion] > b[criterion])
+                if (score_a > score_b)
                     return -1;
                 return 0;
             });
@@ -455,7 +501,37 @@
 
                     <div class="input-group">
                         <div class="input-group-addon"><strong>Criterion</strong></div>
-                        <select class="form-control" id="criterion">
+                        <select class="form-control" id="criterion1">
+                          <option value="physicaldef">Physical Defense</option>
+                          <option value="magicdef">Magic Defense</option>
+                          <option value="firedef">Fire Defense</option>
+                          <option value="lightningdef">Lightning Defense</option>
+                          <option value="darkdef">Dark Defense</option>
+                          <option value="bleedres">Bleed Resistance</option>
+                          <option value="poisonres">Poison Resistance</option>
+                          <option value="frostres">Frost Resistance</option>
+                          <option value="curseres">Curse Resistance</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon hidden-wide"><strong>Criterion 2</strong></div>
+                        <select class="form-control" id="criterion2">
+                          <option value="-">-</option>
+                          <option value="physicaldef">Physical Defense</option>
+                          <option value="magicdef">Magic Defense</option>
+                          <option value="firedef">Fire Defense</option>
+                          <option value="lightningdef">Lightning Defense</option>
+                          <option value="darkdef">Dark Defense</option>
+                          <option value="bleedres">Bleed Resistance</option>
+                          <option value="poisonres">Poison Resistance</option>
+                          <option value="frostres">Frost Resistance</option>
+                          <option value="curseres">Curse Resistance</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon hidden-wide"><strong>Criterion 3</strong></div>
+                        <select class="form-control" id="criterion3">
+                          <option value="-">-</option>
                           <option value="physicaldef">Physical Defense</option>
                           <option value="magicdef">Magic Defense</option>
                           <option value="firedef">Fire Defense</option>
@@ -596,14 +672,31 @@
             // Load user data from the cookie
             var data = Cookies.getJSON('user_data');
             if (data === undefined)
+            {
                 saveUserData();
+            }
             else
+            {
                 user_data = data;
+
+                // Format upgrade
+                if (user_data.criterion !== undefined)
+                {
+                    user_data.criterions = [user_data.criterion];
+                    user_data.criterion = undefined;
+                }
+            }
 
             $('#max_equip_load')[0].value = user_data.max_equip_load;
             $('#limit_equip_load')[0].value = user_data.limit_equip_load;
             $('#weapons_load')[0].value = user_data.weapons_load;
-            $('#criterion').val(user_data.criterion);
+            $('#criterion1').val(user_data.criterions[0]);
+
+            if (user_data.criterions.length > 1)
+                $('#criterion2').val(user_data.criterions[1]);
+
+            if (user_data.criterions.length > 2)
+                $('#criterion3').val(user_data.criterions[2]);
 
             // Load the list of armor items
             $.getJSON('data/armors.json', function(resp) {
@@ -620,7 +713,13 @@
                     user_data.max_equip_load = Number($('#max_equip_load')[0].value);
                     user_data.limit_equip_load = Number($('#limit_equip_load')[0].value);
                     user_data.weapons_load = Number($('#weapons_load')[0].value);
-                    user_data.criterion = $('#criterion')[0].value;
+                    user_data.criterions = [$('#criterion1')[0].value];
+
+                    if ($('#criterion2')[0].value != '-')
+                        user_data.criterions.push($('#criterion2')[0].value);
+
+                    if ($('#criterion3')[0].value != '-')
+                        user_data.criterions.push($('#criterion3')[0].value);
 
                     saveUserData();
                     optimize();
