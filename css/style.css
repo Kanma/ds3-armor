@@ -56,6 +56,18 @@ table.armor-list img.armor-icon
 }
 
 
+table.armor-list td.upgrade
+{
+    color: blue;
+}
+
+
+table.armor-list td.downgrade
+{
+    color: red;
+}
+
+
 .panel-title a.collapsed span.glyphicon-menu-up
 {
     display: none;
