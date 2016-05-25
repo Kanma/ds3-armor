@@ -25,6 +25,13 @@
             weapons_load: 5.0,
             criterions: ['physicaldef'],
 
+            equipped_armor: {
+                helm: null,
+                chest: null,
+                gauntlets: null,
+                leggings: null,
+            },
+
             available_armors: {
                 helms: [],
                 chests: [],
@@ -32,6 +39,23 @@
                 leggings: [],
             }
         }
+
+        var all_columns = [
+            'physicaldef',
+            'strikedef',
+            'slashdef',
+            'thrustdef',
+            'magicdef',
+            'firedef',
+            'lightningdef',
+            'darkdef',
+            'bleedres',
+            'poisonres',
+            'frostres',
+            'curseres',
+            'poise',
+            'weight',
+        ];
 
 
         function saveUserData()
@@ -245,43 +269,6 @@
 
         function optimize()
         {
-            function _create_set(helm, chest, gauntlets, legging)
-            {
-                helm = ref_armors.helms[helm];
-                chest = ref_armors.chests[chest];
-                gauntlets = ref_armors.gauntlets[gauntlets];
-                legging = ref_armors.leggings[legging];
-
-                return {
-                    helm_name:     helm.name,
-                    helm_image:    helm.image,
-                    chest_name:    chest.name,
-                    chest_image:   chest.image,
-                    gauntlets_name:   gauntlets.name,
-                    gauntlets_image:  gauntlets.image,
-                    legging_name:  legging.name,
-                    legging_image: legging.image,
-
-                    physicaldef:   helm.physicaldef + chest.physicaldef + gauntlets.physicaldef + legging.physicaldef,
-                    strikedef:     helm.strikedef + chest.strikedef + gauntlets.strikedef + legging.strikedef,
-                    slashdef:      helm.slashdef + chest.slashdef + gauntlets.slashdef + legging.slashdef,
-                    thrustdef:     helm.thrustdef + chest.thrustdef + gauntlets.thrustdef + legging.thrustdef,
-
-                    magicdef:      helm.magicdef + chest.magicdef + gauntlets.magicdef + legging.magicdef,
-                    firedef:       helm.firedef + chest.firedef + gauntlets.firedef + legging.firedef,
-                    lightningdef:  helm.lightningdef + chest.lightningdef + gauntlets.lightningdef + legging.lightningdef,
-                    darkdef:       helm.darkdef + chest.darkdef + gauntlets.darkdef + legging.darkdef,
-
-                    bleedres:      helm.bleedres + chest.bleedres + gauntlets.bleedres + legging.bleedres,
-                    poisonres:     helm.poisonres + chest.poisonres + gauntlets.poisonres + legging.poisonres,
-                    curseres:      helm.curseres + chest.curseres + gauntlets.curseres + legging.curseres,
-                    frostres:      helm.frostres + chest.frostres + gauntlets.frostres + legging.frostres,
-
-                    poise:         helm.poise + chest.poise + gauntlets.poise + legging.poise,
-                    weight:        helm.weight + chest.weight + gauntlets.weight + legging.weight,
-                };
-            }
-
             var max_equip_load = Number($('#max_equip_load')[0].value);
             var limit_equip_load = Number($('#limit_equip_load')[0].value);
             var weapons_load = Number($('#weapons_load')[0].value);
@@ -291,23 +278,6 @@
             var tbody = $('#results tbody')[0];
             while (tbody.firstChild)
                 tbody.removeChild(tbody.firstChild);
-
-            var columns = [
-                'physicaldef',
-                'strikedef',
-                'slashdef',
-                'thrustdef',
-                'magicdef',
-                'firedef',
-                'lightningdef',
-                'darkdef',
-                'bleedres',
-                'poisonres',
-                'frostres',
-                'curseres',
-                'poise',
-                'weight',
-            ];
 
             var results = [];
 
@@ -331,7 +301,7 @@
                             if (user_data.available_armors.leggings.indexOf(ref_armors.leggings[legging].name) < 0)
                                 continue;
 
-                            var armor_set = _create_set(helm, chest, gauntlets, legging);
+                            var armor_set = createArmorSet(helm, chest, gauntlets, legging);
                             if (armor_set.weight > max_total_equip_load)
                                 continue;
 
@@ -399,74 +369,239 @@
 
             results = results.slice(0, 10);
 
+            var equipped_set = getEquippedArmorSet();
+
             for (var i = 0; i < results.length; ++i)
-            {
-                var tr = document.createElement('tr');
-                tbody.appendChild(tr);
-
-                td = document.createElement('td');
-                tr.appendChild(td);
-
-                var img = document.createElement('img');
-                img.className = 'armor-icon';
-                img.src = 'images/' + (results[i].helm_image != null ? results[i].helm_image : 'placeholder-icon.png') ;
-                td.appendChild(img);
-
-                var span = document.createElement('span');
-                $(span).text(results[i].helm_name);
-                td.appendChild(span);
-
-                td = document.createElement('td');
-                tr.appendChild(td);
-
-                var img = document.createElement('img');
-                img.className = 'armor-icon';
-                img.src = 'images/' + (results[i].chest_image != null ? results[i].chest_image : 'placeholder-icon.png') ;
-                td.appendChild(img);
-
-                span = document.createElement('span');
-                $(span).text(results[i].chest_name);
-                td.appendChild(span);
-
-                td = document.createElement('td');
-                tr.appendChild(td);
-
-                var img = document.createElement('img');
-                img.className = 'armor-icon';
-                img.src = 'images/' + (results[i].gauntlets_image != null ? results[i].gauntlets_image : 'placeholder-icon.png') ;
-                td.appendChild(img);
-
-                span = document.createElement('span');
-                $(span).text(results[i].gauntlets_name);
-                td.appendChild(span);
-
-                td = document.createElement('td');
-                tr.appendChild(td);
-
-                var img = document.createElement('img');
-                img.className = 'armor-icon';
-                img.src = 'images/' + (results[i].legging_image != null ? results[i].legging_image : 'placeholder-icon.png') ;
-                td.appendChild(img);
-
-                span = document.createElement('span');
-                $(span).text(results[i].legging_name);
-                td.appendChild(span);
-
-                for (var j = 0; j < columns.length; ++j)
-                {
-                    td = document.createElement('td');
-                    td.className = 'centered';
-                    $(td).text(results[i][columns[j]].toFixed(1));
-                    tr.appendChild(td);
-                }
-
-                td = document.createElement('td');
-                td.className = 'centered';
-                $(td).text(((results[i].weight + weapons_load) / max_equip_load * 100).toFixed(1) + '%');
-                tr.appendChild(td);
-            }
+                addArmorSetToTable(tbody, results[i], true, equipped_set);
 
             $('#results').trigger('update');
+        }
+
+
+        function changeEquipment(armor_set)
+        {
+            user_data.equipped_armor = {
+                helm: armor_set.helm_name,
+                chest: armor_set.chest_name,
+                gauntlets: armor_set.gauntlets_name,
+                leggings: armor_set.legging_name,
+            };
+
+            saveUserData();
+
+            var tbody = $('#equipped tbody')[0];
+            while (tbody.firstChild)
+                tbody.removeChild(tbody.firstChild);
+
+            addArmorSetToTable(tbody, armor_set);
+
+            $('#equipped_panel').show();
+        }
+
+
+        function addArmorSetToTable(tbody, armor_set, with_button, comparison_set)
+        {
+            var max_equip_load = Number($('#max_equip_load')[0].value);
+            var weapons_load = Number($('#weapons_load')[0].value);
+
+            var tr = document.createElement('tr');
+            tbody.appendChild(tr);
+
+            if (with_button === true)
+            {
+                td = document.createElement('td');
+                tr.appendChild(td);
+
+                var equip_button = document.createElement('button');
+                equip_button.type = 'button';
+                equip_button.className = 'btn btn-default';
+                td.appendChild(equip_button);
+
+                var span = document.createElement('span');
+                span.className = 'glyphicon glyphicon-pushpin';
+                equip_button.appendChild(span);
+
+                $(equip_button).click(function() {
+                    changeEquipment(armor_set);
+
+                    var rows = $(tbody).find('tr');
+                    for (var row_index = 0; row_index < rows.length; ++row_index)
+                    {
+                        var row = rows[row_index];
+                        var columns = $(row).find('td');
+
+                        for (var j = 0; j < all_columns.length; ++j)
+                        {
+                            var column = $(columns[j + 5]);
+                            column.removeClass('downgrade');
+                            column.removeClass('upgrade');
+
+                            var value = Number(column.text());
+                            var ref = Number(armor_set[all_columns[j]].toFixed(1));
+
+                            if (value > ref)
+                                column.addClass('upgrade');
+                            else if (value < ref)
+                                column.addClass('downgrade');
+                        }
+
+                        column = $(columns[all_columns.length + 5]);
+                        column.removeClass('downgrade');
+                        column.removeClass('upgrade');
+
+                        var value = Number(column.text().substr(0, column.text().length - 1));
+                        var ref = Number(((armor_set.weight + weapons_load) / max_equip_load * 100).toFixed(1));
+
+                        if (value < ref)
+                            column.addClass('upgrade');
+                        else if (value > ref)
+                            column.addClass('downgrade');
+                    }
+                });
+            }
+
+            td = document.createElement('td');
+            tr.appendChild(td);
+
+            var img = document.createElement('img');
+            img.className = 'armor-icon';
+            img.src = 'images/' + (armor_set.helm_image != null ? armor_set.helm_image : 'placeholder-icon.png') ;
+            td.appendChild(img);
+
+            span = document.createElement('span');
+            $(span).text(armor_set.helm_name);
+            td.appendChild(span);
+
+            td = document.createElement('td');
+            tr.appendChild(td);
+
+            var img = document.createElement('img');
+            img.className = 'armor-icon';
+            img.src = 'images/' + (armor_set.chest_image != null ? armor_set.chest_image : 'placeholder-icon.png') ;
+            td.appendChild(img);
+
+            span = document.createElement('span');
+            $(span).text(armor_set.chest_name);
+            td.appendChild(span);
+
+            td = document.createElement('td');
+            tr.appendChild(td);
+
+            var img = document.createElement('img');
+            img.className = 'armor-icon';
+            img.src = 'images/' + (armor_set.gauntlets_image != null ? armor_set.gauntlets_image : 'placeholder-icon.png') ;
+            td.appendChild(img);
+
+            span = document.createElement('span');
+            $(span).text(armor_set.gauntlets_name);
+            td.appendChild(span);
+
+            td = document.createElement('td');
+            tr.appendChild(td);
+
+            var img = document.createElement('img');
+            img.className = 'armor-icon';
+            img.src = 'images/' + (armor_set.legging_image != null ? armor_set.legging_image : 'placeholder-icon.png') ;
+            td.appendChild(img);
+
+            span = document.createElement('span');
+            $(span).text(armor_set.legging_name);
+            td.appendChild(span);
+
+            for (var j = 0; j < all_columns.length; ++j)
+            {
+                td = document.createElement('td');
+                td.className = 'centered';
+                $(td).text(armor_set[all_columns[j]].toFixed(1));
+                tr.appendChild(td);
+
+                if (comparison_set != null)
+                {
+                    if (armor_set[all_columns[j]] > comparison_set[all_columns[j]])
+                        td.className += ' upgrade';
+                    else if (armor_set[all_columns[j]] < comparison_set[all_columns[j]])
+                        td.className += ' downgrade';
+                }
+            }
+
+            td = document.createElement('td');
+            td.className = 'centered';
+            $(td).text(((armor_set.weight + weapons_load) / max_equip_load * 100).toFixed(1) + '%');
+            tr.appendChild(td);
+
+            if (comparison_set != null)
+            {
+                if (armor_set.weight < comparison_set.weight)
+                    td.className += ' upgrade';
+                else if (armor_set.weight > comparison_set.weight)
+                    td.className += ' downgrade';
+            }
+        }
+
+
+        function createArmorSet(helm, chest, gauntlets, legging)
+        {
+            helm = ref_armors.helms[helm];
+            chest = ref_armors.chests[chest];
+            gauntlets = ref_armors.gauntlets[gauntlets];
+            legging = ref_armors.leggings[legging];
+
+            return {
+                helm_name:     helm.name,
+                helm_image:    helm.image,
+                chest_name:    chest.name,
+                chest_image:   chest.image,
+                gauntlets_name:   gauntlets.name,
+                gauntlets_image:  gauntlets.image,
+                legging_name:  legging.name,
+                legging_image: legging.image,
+
+                physicaldef:   helm.physicaldef + chest.physicaldef + gauntlets.physicaldef + legging.physicaldef,
+                strikedef:     helm.strikedef + chest.strikedef + gauntlets.strikedef + legging.strikedef,
+                slashdef:      helm.slashdef + chest.slashdef + gauntlets.slashdef + legging.slashdef,
+                thrustdef:     helm.thrustdef + chest.thrustdef + gauntlets.thrustdef + legging.thrustdef,
+
+                magicdef:      helm.magicdef + chest.magicdef + gauntlets.magicdef + legging.magicdef,
+                firedef:       helm.firedef + chest.firedef + gauntlets.firedef + legging.firedef,
+                lightningdef:  helm.lightningdef + chest.lightningdef + gauntlets.lightningdef + legging.lightningdef,
+                darkdef:       helm.darkdef + chest.darkdef + gauntlets.darkdef + legging.darkdef,
+
+                bleedres:      helm.bleedres + chest.bleedres + gauntlets.bleedres + legging.bleedres,
+                poisonres:     helm.poisonres + chest.poisonres + gauntlets.poisonres + legging.poisonres,
+                curseres:      helm.curseres + chest.curseres + gauntlets.curseres + legging.curseres,
+                frostres:      helm.frostres + chest.frostres + gauntlets.frostres + legging.frostres,
+
+                poise:         helm.poise + chest.poise + gauntlets.poise + legging.poise,
+                weight:        helm.weight + chest.weight + gauntlets.weight + legging.weight,
+            };
+        }
+
+
+        function getEquippedArmorSet()
+        {
+            if (user_data.equipped_armor.helm !== null)
+            {
+                return createArmorSet(
+                    getArmorIndex('helms', user_data.equipped_armor.helm),
+                    getArmorIndex('chests', user_data.equipped_armor.chest),
+                    getArmorIndex('gauntlets', user_data.equipped_armor.gauntlets),
+                    getArmorIndex('leggings', user_data.equipped_armor.leggings)
+                );
+            }
+
+            return null;
+        }
+
+
+        function getArmorIndex(kind, name)
+        {
+            for (var index = 0; index < ref_armors[kind].length; ++index)
+            {
+                if (ref_armors[kind][index].name === name)
+                    return index;
+            }
+
+            return null;
         }
 
     </script>
@@ -549,12 +684,12 @@
             </div>
         </div>
 
-        <div id="results_panel" class="panel panel-success" style="display:none;">
+        <div id="equipped_panel" class="panel panel-warning" style="display:none;">
             <div class="panel-heading">
-                <h3 class="panel-title">Results</h3>
+                <h3 class="panel-title">Equipped</h3>
             </div>
             <div class="panel-body">
-                <table id="results" class="table table-hover table-bordered armor-list tablesorter">
+                <table id="equipped" class="table table-bordered armor-list">
                     <thead>
                         <tr>
                             <th colspan="4"></th>
@@ -564,6 +699,50 @@
                             <th colspan="3"></th>
                         </tr>
                         <tr>
+                            <th>Helm</th>
+                            <th>Chest</th>
+                            <th>Gloves</th>
+                            <th>Legging</th>
+                            <th><img src="images/icon-physicaldef.png" title="Physical defense" /></th>
+                            <th><img src="images/icon-strikedef.png" title="Strike defense" /></th>
+                            <th><img src="images/icon-slashdef.png" title="Slash defense" /></th>
+                            <th><img src="images/icon-thrustdef.png" title="Thrust defense" /></th>
+                            <th><img src="images/icon-magicdef.png" title="Magic defense" /></th>
+                            <th><img src="images/icon-firedef.png" title="Fire defense" /></th>
+                            <th><img src="images/icon-lightningdef.png" title="Lightning defense" /></th>
+                            <th><img src="images/icon-darkdef.png" title="Dark defense" /></th>
+                            <th><img src="images/icon-bleedres.png" title="Bleed resistance" /></th>
+                            <th><img src="images/icon-poisonres.png" title="Poison resistance" /></th>
+                            <th><img src="images/icon-frostres.png" title="Frost resistance" /></th>
+                            <th><img src="images/icon-curseres.png" title="Curse resistance" /></th>
+                            <th><img src="images/icon-poise.png" title="Poise" /></th>
+                            <th><img src="images/icon-durability.png" title="Durability" /></th>
+                            <th><img src="images/icon-weight.png" title="Equip load" /></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="results_panel" class="panel panel-success" style="display:none;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Results</h3>
+            </div>
+            <div class="panel-body">
+                <table id="results" class="table table-hover table-bordered armor-list tablesorter">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th colspan="4"></th>
+                            <th colspan="4">Physical defenses</th>
+                            <th colspan="4">Elemental defenses</th>
+                            <th colspan="4">Resistances</th>
+                            <th colspan="3"></th>
+                        </tr>
+                        <tr>
+                            <th></th>
                             <th>Helm</th>
                             <th>Chest</th>
                             <th>Gloves</th>
@@ -685,6 +864,16 @@
                     user_data.criterions = [user_data.criterion];
                     user_data.criterion = undefined;
                 }
+
+                if (user_data.equipped_armor === undefined)
+                {
+                    user_data.equipped_armor = {
+                        helm: null,
+                        chest: null,
+                        gauntlets: null,
+                        leggings: null,
+                    };
+                }
             }
 
             $('#max_equip_load')[0].value = user_data.max_equip_load;
@@ -757,7 +946,10 @@
                     },
                 }); 
 
-                optimize();
+
+                var equipped_armor_style = getEquippedArmorSet();
+                if (equipped_armor_style !== null)
+                    changeEquipment(equipped_armor_style);
             });
         });
     </script>
